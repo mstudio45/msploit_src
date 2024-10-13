@@ -13,7 +13,7 @@ namespace MSploitRecode.Classes
         public static string DOMAIN { get; set; } = "https://msploit.mstudio45.com/";
 
         // Versions //
-        public static string CURRENT_GUI_VERSION { get; set; } = "2.0.0";
+        public static string CURRENT_GUI_VERSION { get; set; } = "2.0.1";
         public static string GUI_VERSION { get; set; }
         public static bool OUTDATED { get; set; } = false;
 
