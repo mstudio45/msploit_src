@@ -21,30 +21,38 @@ namespace MSploitRecode
     public partial class Bootstrapper : Form
     {
         private Fade fade;
+        private TopMost topMost;
         private Random random = new Random();
         private WebClient webClient = new WebClient { Proxy = null };
         private WebClient webClientNoProgress = new WebClient { Proxy = null };
 
-
         public Bootstrapper()
         {
             InitializeComponent();
+            this.Load += new System.EventHandler(Program.OnFromLoaded);
+            this.FormClosed += Program.OnFromClosed;
+
+            new Drag(this, this.TopBar);
+            fade = new Fade(this);
+            topMost = new TopMost(this);
 
             this.Minimize.Location = this.Maximize.Location;
-            new Drag(this, this.TopBar);
-
-            fade = new Fade(this);
+            this.Maximize.Visible = false;
         }
 
         // Top Bar //
         private void Close_Click(object sender, EventArgs e)
         {
-            Environment.Exit(0);
+            this.Close();
+            Application.Exit();
         }
 
         private void Maximize_Click(object sender, EventArgs e)
         {
-            this.WindowState = FormWindowState.Maximized;
+            if (this.WindowState == FormWindowState.Maximized)
+                this.WindowState = FormWindowState.Normal;
+            else
+                this.WindowState = FormWindowState.Maximized;
         }
 
         private void Minimize_Click(object sender, EventArgs e)
@@ -74,7 +82,7 @@ namespace MSploitRecode
                 Tuple<bool, string> downloadURL = GetString(URL, true);
                 if (!downloadURL.Item1)
                 {
-                    MessageBox.Show("Failed to fetch download URL for " + NAME + "!", "MSPLOIT", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    topMost.MessageBoxShow("Failed to fetch download URL for " + NAME + "!", "MSPLOIT", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return false;
                 }
 
@@ -96,7 +104,7 @@ namespace MSploitRecode
 
             if (!File.Exists(ZIP))
             {
-                MessageBox.Show("Failed to download " + NAME + "!", "MSPLOIT", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                topMost.MessageBoxShow("Failed to download " + NAME + "!", "MSPLOIT", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
 
@@ -135,10 +143,12 @@ namespace MSploitRecode
         {
             if (IsRunFromTempFolder() || IsLikelyRunFromZipFolder())
             {
-                MessageBox.Show("It seems you started MSPLOIT in a temporary folder/inside a zip file. Please extract it into a folder!", "MSPLOIT", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                topMost.MessageBoxShow("It seems you started MSPLOIT in a temporary folder/inside a zip file. Please extract it into a folder!", "MSPLOIT", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Environment.Exit(0);
                 return;
             }
+
+            Data.injectorMain = new InjectorMain();
 
             webClient.DownloadProgressChanged += (progressSender, progressE) => { this.Progress.Value = progressE.ProgressPercentage; };
             await fade.FadeIn();
@@ -156,7 +166,7 @@ namespace MSploitRecode
             // Check Version //
             if (GuiVersion.Item1 == false)
             {
-                MessageBox.Show("Failed to check MSPLOIT version.", "MSPLOIT", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                topMost.MessageBoxShow("Failed to check MSPLOIT version.", "MSPLOIT", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             else
             {
@@ -230,15 +240,15 @@ namespace MSploitRecode
             // Synapse Z API //
             this.Status.Text = "Initializing Synapse Z...";
             await Task.Delay(250);
-            if (InjectorMain.synapseZ.FindLauncher() == String.Empty)
+            if (Data.injectorMain.synapseZ.FindLauncher() == String.Empty)
             {
-                bool SynZSuccess = await DownloadAndExtract("Synapse Z", "https://synapse-z.netlify.app/Synapse%20Z.zip", false, Path.Combine(Data.TempFolder, "SynapseZ.zip"), InjectorMain.synapseZ.FolderPath);
+                bool SynZSuccess = await DownloadAndExtract("Synapse Z", "https://synapse-z.netlify.app/Synapse%20Z.zip", false, Path.Combine(Data.TempFolder, "SynapseZ.zip"), Data.injectorMain.synapseZ.FolderPath);
 
-                Data.SynapseZ = SynZSuccess && InjectorMain.synapseZ.FindLauncher() != String.Empty;
+                Data.SynapseZ = SynZSuccess && Data.injectorMain.synapseZ.FindLauncher() != String.Empty;
                 if (Data.SynapseZ)
                 {
                     this.TopMost = false;
-                    MessageBox.Show("If you have used Synapse Z before, copy the bin and workspace folder into '" + InjectorMain.synapseZ.FolderPath + "'.", "MSPLOIT", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    topMost.MessageBoxShow("If you have used Synapse Z before, copy the bin and workspace folder into '" + Data.injectorMain.synapseZ.FolderPath + "'.", "MSPLOIT", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     this.TopMost = true;
                 }
             }
@@ -248,7 +258,7 @@ namespace MSploitRecode
             if (!Data.Seliware && !Data.SynapseZ)
             {
                 this.TopMost = false;
-                MessageBox.Show("Failed to initialize Seliware and Synapse Z API.", "MSPLOIT", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                topMost.MessageBoxShow("Failed to initialize Seliware and Synapse Z API.", "MSPLOIT", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Environment.Exit(0);
                 return;
             }
@@ -257,12 +267,24 @@ namespace MSploitRecode
                 this.Status.Text = "Loading v" + Data.CURRENT_GUI_VERSION + " (v" + Data.GUI_VERSION + ")...";
             else
                 this.Status.Text = "Loading v" + Data.CURRENT_GUI_VERSION + "...";
+
+            this.Progress.Value = 90;
+
+            // Load Settings //
+            this.Status.Text = "Loading saved settings...";
+            var SettingsData = Classes.Settings.GetSettings();
+            if (SettingsData.success == true)
+            {
+                Data.SettingsLoaded = true;
+                Data.Settings = SettingsData.data;
+                this.Status.Text = "Settings loaded.";
+            }
             this.Progress.Value = 100;
 
             // Load UI Pick //
             await Task.Delay(500);
             await fade.FadeOut();
-            new UISelect().Show();
+            new UISelect(true).Show();
             this.Close();
         }
     }

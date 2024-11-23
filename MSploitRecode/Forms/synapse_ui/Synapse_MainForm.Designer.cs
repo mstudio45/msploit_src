@@ -34,7 +34,7 @@
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.Maximize = new System.Windows.Forms.Label();
             this.Minimize = new System.Windows.Forms.Label();
-            this.Close = new System.Windows.Forms.Label();
+            this.CloseBtn = new System.Windows.Forms.Label();
             this.TopBar = new System.Windows.Forms.Label();
             this.Execute = new System.Windows.Forms.Button();
             this.Clear = new System.Windows.Forms.Button();
@@ -58,7 +58,7 @@
             this.panel1.Controls.Add(this.pictureBox1);
             this.panel1.Controls.Add(this.Maximize);
             this.panel1.Controls.Add(this.Minimize);
-            this.panel1.Controls.Add(this.Close);
+            this.panel1.Controls.Add(this.CloseBtn);
             this.panel1.Controls.Add(this.TopBar);
             this.panel1.Location = new System.Drawing.Point(-4, 0);
             this.panel1.Name = "panel1";
@@ -118,16 +118,16 @@
             // 
             // Close
             // 
-            this.Close.AutoSize = true;
-            this.Close.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.Close.Font = new System.Drawing.Font("Segoe UI Semibold", 11.25F);
-            this.Close.ForeColor = System.Drawing.SystemColors.Control;
-            this.Close.Location = new System.Drawing.Point(920, 0);
-            this.Close.Name = "Close";
-            this.Close.Size = new System.Drawing.Size(18, 20);
-            this.Close.TabIndex = 1;
-            this.Close.Text = "X";
-            this.Close.Click += new System.EventHandler(this.Close_Click);
+            this.CloseBtn.AutoSize = true;
+            this.CloseBtn.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.CloseBtn.Font = new System.Drawing.Font("Segoe UI Semibold", 11.25F);
+            this.CloseBtn.ForeColor = System.Drawing.SystemColors.Control;
+            this.CloseBtn.Location = new System.Drawing.Point(920, 0);
+            this.CloseBtn.Name = "Close";
+            this.CloseBtn.Size = new System.Drawing.Size(18, 20);
+            this.CloseBtn.TabIndex = 1;
+            this.CloseBtn.Text = "X";
+            this.CloseBtn.Click += new System.EventHandler(this.Close_Click);
             // 
             // TopBar
             // 
@@ -243,6 +243,7 @@
             this.Options.TabIndex = 7;
             this.Options.Text = "Options";
             this.Options.UseVisualStyleBackColor = false;
+            this.Options.Click += new System.EventHandler(this.Options_Click);
             // 
             // ScriptHub
             // 
@@ -259,6 +260,7 @@
             this.ScriptHub.TabIndex = 8;
             this.ScriptHub.Text = "Script Hub";
             this.ScriptHub.UseVisualStyleBackColor = false;
+            this.ScriptHub.Click += new System.EventHandler(this.ScriptHub_Click);
             // 
             // Inject
             // 
@@ -363,7 +365,7 @@
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Label Maximize;
         private System.Windows.Forms.Label Minimize;
-        private System.Windows.Forms.Label Close;
+        private System.Windows.Forms.Label CloseBtn;
         private System.Windows.Forms.Label TopBar;
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Button Execute;

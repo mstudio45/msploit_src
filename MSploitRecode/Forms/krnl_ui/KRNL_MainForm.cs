@@ -12,19 +12,27 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
 using System.ComponentModel;
+using MSploitRecode.Forms.synapse_ui;
+using System.Collections.Generic;
+using System.Drawing;
 
 namespace MSploitRecode.Forms.krnl_ui
 {
     public partial class KRNL_MainForm : Form
     {
         private Fade fade;
+        private TopMost topMost;
+        Dictionary<String, Script> script_array = new Dictionary<String, Script>();
 
         public KRNL_MainForm()
         {
             InitializeComponent();
+            this.Load += new System.EventHandler(Program.OnFromLoaded);
+            this.FormClosed += Program.OnFromClosed;
 
             new Drag(this, this.TopBar);
             fade = new Fade(this);
+            topMost = new TopMost(this);
         }
 
         // Top Bar //
@@ -46,7 +54,8 @@ namespace MSploitRecode.Forms.krnl_ui
                 catch { }
             }
 
-            Environment.Exit(0);
+            Program.bootstrapper.Close();
+            Application.Exit();
         }
 
         private void Minimize_Click(object sender, EventArgs e)
@@ -120,11 +129,11 @@ namespace MSploitRecode.Forms.krnl_ui
             }
             catch (COMException ex)
             {
-                MessageBox.Show($"Error initializing WebView2: {ex.Message}", "MSPLOIT");
+                topMost.MessageBoxShow($"Error initializing WebView2: {ex.Message}", "MSPLOIT");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"An unexpected error occurred: {ex.Message}", "MSPLOIT");
+                topMost.MessageBoxShow($"An unexpected error occurred: {ex.Message}", "MSPLOIT");
             }
         }
 
@@ -210,7 +219,9 @@ namespace MSploitRecode.Forms.krnl_ui
 
         private void InjectSecond_Click(object sender, EventArgs e)
         {
-            InjectorMain.Inject();
+            topMost.Disable();
+            Data.injectorMain.Inject();
+            topMost.Enable();
         }
 
         private void AddTab_Click(object sender, EventArgs e)
@@ -221,14 +232,20 @@ namespace MSploitRecode.Forms.krnl_ui
         // Main Buttons //
         private void Inject_Click(object sender, EventArgs e)
         {
-            InjectorMain.Inject();
+            topMost.Disable();
+            Data.injectorMain.Inject();
+            topMost.Enable();
         }
 
         private async void Execute_Click(object sender, EventArgs e)
         {
+            topMost.Disable();
+
             string script = await GetText();
-            var data = InjectorMain.Execute(script);
-            if (!data.success) MessageBox.Show(data.message, "MSPLOIT", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            var data = Data.injectorMain.Execute(script);
+            if (!data.success) topMost.MessageBoxShow(data.message, "MSPLOIT", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+            topMost.Enable();
         }
 
         private void Clear_Click(object sender, EventArgs e)
@@ -240,7 +257,7 @@ namespace MSploitRecode.Forms.krnl_ui
         {
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
-                openFileDialog.InitialDirectory = Data.API == "Synapse Z" ? Path.Combine(InjectorMain.synapseZ.FolderPath, "scripts") : Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                openFileDialog.InitialDirectory = Data.API == "Synapse Z" ? Path.Combine(Data.injectorMain.synapseZ.FolderPath, "scripts") : Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
                 openFileDialog.Filter = "lua files (*.lua)|*.lua|txt files (*.txt)|*.txt|All files (*.*)|*.*";
                 openFileDialog.FilterIndex = 1;
                 openFileDialog.RestoreDirectory = true;
@@ -267,7 +284,7 @@ namespace MSploitRecode.Forms.krnl_ui
             {
                 var saveFileDialog = new System.Windows.Forms.SaveFileDialog
                 {
-                    InitialDirectory = Data.API == "Synapse Z" ? Path.Combine(InjectorMain.synapseZ.FolderPath, "scripts") : Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+                    InitialDirectory = Data.API == "Synapse Z" ? Path.Combine(Data.injectorMain.synapseZ.FolderPath, "scripts") : Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
                     Filter = "Lua files (*.lua)|*.lua|Text files (*.txt)|*.txt",
                     RestoreDirectory = true,
                     ShowHelp = false,
@@ -278,7 +295,32 @@ namespace MSploitRecode.Forms.krnl_ui
             }
             catch
             {
-                MessageBox.Show("Failed to save file.", "MSPLOIT", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                topMost.MessageBoxShow("Failed to save file.", "MSPLOIT", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void Options_Click(object sender, EventArgs e)
+        {
+            if (Data.SettingsUIForm == null) Data.SettingsUIForm = new Settings();
+            Data.SettingsUIForm.Show();
+        }
+
+        private void GameItem_Click(object sender, EventArgs e)
+        {
+            if (Data.ScriptsBloxScriptsForm == null) Data.ScriptsBloxScriptsForm = new ScriptBloxScripts();
+            Data.ScriptsBloxScriptsForm.Show();
+        }
+
+        private void HotScripts_DropDownItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+            if (script_array.ContainsKey(e.ClickedItem.Text))
+            {
+                Script scriptData = script_array[e.ClickedItem.Text];
+
+                if (scriptData.DiscordInvite != "") Process.Start("https://discord.gg/" + scriptData.DiscordInvite);
+                var execute = Data.injectorMain.Execute(scriptData.ScriptData);
+                if (!execute.success)
+                    topMost.MessageBoxShow(execute.message, "MSPLOIT", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -309,6 +351,89 @@ namespace MSploitRecode.Forms.krnl_ui
             }
 
             if (Data.TotalTabs == 0) AddNewTab("", "Tab 1", "");
+
+            HotScripts.DropDownItems.Clear();
+
+            script_array["mspaint"] = new Script(
+                "mspaint",
+                "mspaint is a free open sourced script hub. discord.gg/mspaint",
+                "https://mspaint.upio.dev/favicon.ico",
+                "loadstring(game:HttpGet(\"https://raw.githubusercontent.com/notpoiu/mspaint/main/main.lua\"))()",
+                true,
+                ""
+            );
+
+            script_array["sUNC"] = new Script(
+                "sUNC",
+                "An fork of UNC that exposes fake functions and have detection for faked UNC.",
+                "",
+                "loadstring(game:HttpGet(\"https://gitlab.com/sens3/nebunu/-/raw/main/HummingBird8's_sUNC_yes_i_moved_to_gitlab_because_my_github_acc_got_brickedd/sUNCm0m3n7.lua\"))()",
+                true,
+                ""
+            );
+
+            script_array["UNC"] = new Script(
+                "UNC",
+                "[Discontinued] Official Unified Naming Convention.",
+                "",
+                "loadstring(game:HttpGet(\"https://github.com/unified-naming-convention/NamingStandard/blob/main/UNCCheckEnv.lua\"))()",
+                true,
+                ""
+            );
+
+            script_array["Infinite Yield"] = new Script(
+                "Infinite Yield",
+                "Infinite Yield is an open-source admin commands script created by Edge, Zwolf, and Moon.",
+                "https://msploit.mstudio45.com/images/IY.png",
+                "loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()",
+                true,
+                ""
+            );
+
+            script_array["Dark Dex"] = new Script(
+                "Dark Dex",
+                "A version of the popular Dex explorer with patches specifically for Synapse X.",
+                "https://msploit.mstudio45.com/images/DarkDex.png",
+                "loadstring(game:HttpGet(\"https://raw.githubusercontent.com/infyiff/backup/main/dex.lua\"))()",
+                true,
+                ""
+            );
+
+            script_array["Simple Spy"] = new Script(
+                "Simple Spy",
+                "Simplified version of Remote Spy.",
+                "https://raw.githubusercontent.com/exxtremestuffs/SimpleSpySource/master/assets/example-1.png",
+                "loadstring(game:HttpGet(\"https://raw.githubusercontent.com/infyiff/backup/main/SimpleSpyV3/main.lua\"))()",
+                true,
+                ""
+            );
+
+            script_array["Hydroxide"] = new Script(
+                "Hydroxide",
+                "General purpose pen-testing tool for games on the Roblox engine. This is an modern Remote Spy, Closure Spy, Upvalue/Constant/Script/Module scanner.",
+                "https://raw.githubusercontent.com/Upbolt/Hydroxide/revision/github-assets/ui.png",
+                "local a=\"Upbolt\"local b=\"revision\"local function c(d)return loadstring(game:HttpGetAsync((\"https://raw.githubusercontent.com/%s/Hydroxide/%s/%s.lua\"):format(a,b,d)),d..'.lua')()end;c(\"init\")c(\"ui/main\")",
+                true,
+                ""
+            );
+
+            script_array["Cmd X"] = new Script(
+                "Cmd X",
+                "A admin script with over 600 commands.",
+                string.Empty,
+                "loadstring(game:HttpGet(\"https://raw.githubusercontent.com/CMD-X/CMD-X/master/Source\", true))()",
+                true,
+                ""
+            );
+
+            foreach (Script scriptdata in script_array.Values)
+            {
+                ToolStripMenuItem item = new ToolStripMenuItem();
+                item.Text = scriptdata.Name.ToString();
+                item.BackColor = Color.FromArgb(33, 33, 33);
+                item.ForeColor = Color.White;
+                HotScripts.DropDownItems.Add(item);
+            }
         }
     }
 }

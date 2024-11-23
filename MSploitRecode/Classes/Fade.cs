@@ -38,6 +38,7 @@ namespace MSploitRecode.Classes
                 await Task.Delay(20);
             }
 
+            await Task.Delay(500);
             this.form.Hide();
         }
     }

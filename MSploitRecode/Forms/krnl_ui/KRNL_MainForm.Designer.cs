@@ -31,7 +31,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(KRNL_MainForm));
             this.panel1 = new System.Windows.Forms.Panel();
             this.Minimize = new System.Windows.Forms.Button();
-            this.Close = new System.Windows.Forms.Button();
+            this.CloseBtn = new System.Windows.Forms.Button();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.TopBar = new System.Windows.Forms.Label();
             this.Execute = new System.Windows.Forms.Button();
@@ -49,8 +49,8 @@
             this.InjectSecond = new System.Windows.Forms.ToolStripMenuItem();
             this.KillRoblox = new System.Windows.Forms.ToolStripMenuItem();
             this.creditsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripMenuItem();
-            this.creditsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.GameItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.HotScripts = new System.Windows.Forms.ToolStripMenuItem();
             this.othersToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.tabsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.AddTab = new System.Windows.Forms.ToolStripMenuItem();
@@ -64,7 +64,7 @@
             // 
             this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(29)))), ((int)(((byte)(29)))), ((int)(((byte)(29)))));
             this.panel1.Controls.Add(this.Minimize);
-            this.panel1.Controls.Add(this.Close);
+            this.panel1.Controls.Add(this.CloseBtn);
             this.panel1.Controls.Add(this.pictureBox1);
             this.panel1.Controls.Add(this.TopBar);
             this.panel1.Location = new System.Drawing.Point(0, 0);
@@ -90,21 +90,21 @@
             this.Minimize.UseVisualStyleBackColor = false;
             this.Minimize.Click += new System.EventHandler(this.Minimize_Click);
             // 
-            // Close
+            // CloseBtn
             // 
-            this.Close.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.Close.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(29)))), ((int)(((byte)(29)))), ((int)(((byte)(29)))));
-            this.Close.FlatAppearance.BorderSize = 0;
-            this.Close.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.Close.Font = new System.Drawing.Font("Corbel", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.Close.ForeColor = System.Drawing.Color.White;
-            this.Close.Location = new System.Drawing.Point(647, 0);
-            this.Close.Name = "Close";
-            this.Close.Size = new System.Drawing.Size(35, 33);
-            this.Close.TabIndex = 18;
-            this.Close.Text = "✕";
-            this.Close.UseVisualStyleBackColor = false;
-            this.Close.Click += new System.EventHandler(this.Close_Click);
+            this.CloseBtn.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.CloseBtn.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(29)))), ((int)(((byte)(29)))), ((int)(((byte)(29)))));
+            this.CloseBtn.FlatAppearance.BorderSize = 0;
+            this.CloseBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.CloseBtn.Font = new System.Drawing.Font("Corbel", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.CloseBtn.ForeColor = System.Drawing.Color.White;
+            this.CloseBtn.Location = new System.Drawing.Point(647, 0);
+            this.CloseBtn.Name = "CloseBtn";
+            this.CloseBtn.Size = new System.Drawing.Size(35, 33);
+            this.CloseBtn.TabIndex = 18;
+            this.CloseBtn.Text = "✕";
+            this.CloseBtn.UseVisualStyleBackColor = false;
+            this.CloseBtn.Click += new System.EventHandler(this.Close_Click);
             // 
             // pictureBox1
             // 
@@ -229,6 +229,7 @@
             this.Options.Text = "OPTIONS";
             this.Options.TextImageRelation = System.Windows.Forms.TextImageRelation.TextBeforeImage;
             this.Options.UseVisualStyleBackColor = false;
+            this.Options.Click += new System.EventHandler(this.Options_Click);
             // 
             // Inject
             // 
@@ -295,8 +296,8 @@
             this.menuStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripMenuItem1,
             this.creditsToolStripMenuItem,
-            this.toolStripMenuItem4,
-            this.creditsToolStripMenuItem1,
+            this.GameItem,
+            this.HotScripts,
             this.othersToolStripMenuItem1,
             this.tabsToolStripMenuItem});
             this.menuStrip2.Location = new System.Drawing.Point(0, 32);
@@ -340,21 +341,23 @@
             this.creditsToolStripMenuItem.Size = new System.Drawing.Size(56, 20);
             this.creditsToolStripMenuItem.Text = "Credits";
             // 
-            // toolStripMenuItem4
+            // GameItem
             // 
-            this.toolStripMenuItem4.AccessibleName = "scripthubtoolStripMenuItem1";
-            this.toolStripMenuItem4.ForeColor = System.Drawing.Color.WhiteSmoke;
-            this.toolStripMenuItem4.Name = "toolStripMenuItem4";
-            this.toolStripMenuItem4.Size = new System.Drawing.Size(55, 20);
-            this.toolStripMenuItem4.Text = "Games";
+            this.GameItem.AccessibleName = "GameItem";
+            this.GameItem.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.GameItem.Name = "GameItem";
+            this.GameItem.Size = new System.Drawing.Size(55, 20);
+            this.GameItem.Text = "Games";
+            this.GameItem.Click += new System.EventHandler(this.GameItem_Click);
             // 
-            // creditsToolStripMenuItem1
+            // HotScripts
             // 
-            this.creditsToolStripMenuItem1.AccessibleName = "scripthubtoolStripMenuItem1";
-            this.creditsToolStripMenuItem1.ForeColor = System.Drawing.Color.WhiteSmoke;
-            this.creditsToolStripMenuItem1.Name = "creditsToolStripMenuItem1";
-            this.creditsToolStripMenuItem1.Size = new System.Drawing.Size(79, 20);
-            this.creditsToolStripMenuItem1.Text = "Hot-Scripts";
+            this.HotScripts.AccessibleName = "HotScriptsItem";
+            this.HotScripts.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.HotScripts.Name = "HotScripts";
+            this.HotScripts.Size = new System.Drawing.Size(79, 20);
+            this.HotScripts.Text = "Hot-Scripts";
+            this.HotScripts.DropDownItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.HotScripts_DropDownItemClicked);
             // 
             // othersToolStripMenuItem1
             // 
@@ -452,16 +455,16 @@
         private System.Windows.Forms.TreeView ScriptList;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Button Minimize;
-        private System.Windows.Forms.Button Close;
+        private System.Windows.Forms.Button CloseBtn;
         private System.Windows.Forms.Label TopBar;
         private System.Windows.Forms.MenuStrip menuStrip2;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem InjectSecond;
         private System.Windows.Forms.ToolStripMenuItem KillRoblox;
         private System.Windows.Forms.ToolStripMenuItem creditsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem creditsToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem HotScripts;
         private System.Windows.Forms.ToolStripMenuItem othersToolStripMenuItem1;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem4;
+        private System.Windows.Forms.ToolStripMenuItem GameItem;
         private System.Windows.Forms.ToolStripMenuItem tabsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem AddTab;
     }

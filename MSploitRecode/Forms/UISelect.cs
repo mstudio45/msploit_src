@@ -1,6 +1,7 @@
 ﻿using MSploitRecode.Classes;
 using SeliwareAPI;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -10,24 +11,39 @@ namespace MSploitRecode.Forms
     public partial class UISelect : Form
     {
         private Fade fade;
+        private TopMost topMost;
+        private bool clicked;
+        private bool loadFromFile;
 
-        public UISelect()
+        public UISelect(bool loadFromFile)
         {
+            this.loadFromFile = loadFromFile;
+
             InitializeComponent();
+            this.Load += new System.EventHandler(Program.OnFromLoaded);
+            this.FormClosed += Program.OnFromClosed;
 
             new Drag(this, this.TopBar);
             fade = new Fade(this);
+            topMost = new TopMost(this);
+
+            this.Minimize.Location = this.Maximize.Location;
+            this.Maximize.Visible = false;
         }
 
         // Top Bar //
         private void Close_Click(object sender, EventArgs e)
         {
-            Environment.Exit(0);
+            Program.bootstrapper.Close();
+            Application.Exit();
         }
 
         private void Maximize_Click(object sender, EventArgs e)
         {
-            this.WindowState = FormWindowState.Maximized;
+            if (this.WindowState == FormWindowState.Maximized)
+                this.WindowState = FormWindowState.Normal;
+            else
+                this.WindowState = FormWindowState.Maximized;
         }
 
         private void Minimize_Click(object sender, EventArgs e)
@@ -39,17 +55,13 @@ namespace MSploitRecode.Forms
         private void Save()
         {
             if (!this.SaveUI.Checked) return;
-            
-            File.WriteAllText(Data.UIFile, this.UIList.Text);
-            File.WriteAllText(Data.APIFile, this.APIList.Text);
-        }
 
-        private Tuple<string, string> Get()
-        {
-            string UI = File.Exists(Data.UIFile) ? File.ReadAllText(Data.UIFile) : "";
-            string API = File.Exists(Data.APIFile) ? File.ReadAllText(Data.APIFile) : "";
-
-            return Tuple.Create<string, string>(UI, API);
+            Classes.Settings.SaveSettings(new SettingsData
+            {
+                API = this.APIList.Text,
+                UI = this.UIList.Text,
+                ToolsUIEnabled = this.OpenTools.Checked
+            });
         }
         
         // UI Functions //
@@ -63,6 +75,7 @@ namespace MSploitRecode.Forms
 
             if (form != null)
             {
+                Data.CurrentUIForm = form;
                 await fade.FadeOut();
                 form.Show();
                 callback?.Invoke();
@@ -70,54 +83,65 @@ namespace MSploitRecode.Forms
         }
 
         // API Functions //
+        private readonly Dictionary<string, Func<bool>> apiAvailability = new Dictionary<string, Func<bool>>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "Synapse Z", () => Data.SynapseZ },
+            { "Seliware", () => Data.Seliware }
+        };
+        
         private string GetBackupAPI(string API)
         {
             return API.Equals("Synapse Z", StringComparison.OrdinalIgnoreCase) ? "Seliware" : "Synapse Z";
         }
+
         private bool TryLoadAPI(string API)
         {
-            if (API.Equals("Seliware", StringComparison.OrdinalIgnoreCase) && Data.SeliwareLoaded == false)
+            switch (API)
             {
-                this.TopMost = false;
-                Data.SeliwareLoaded = true;
+                case "Seliware":
+                    if (Data.SeliwareLoaded == false)
+                    {
+                        this.TopMost = false;
+                        Data.SeliwareLoaded = true;
+                        if (!File.Exists("C:\\Windows\\System32\\drivers\\etc\\hosts")) File.Create("C:\\Windows\\System32\\drivers\\etc\\hosts");
+                        Data.Seliware = Seliware.Initialize();
 
-                if (!File.Exists("C:\\Windows\\System32\\drivers\\etc\\hosts")) File.Create("C:\\Windows\\System32\\drivers\\etc\\hosts");
-                Data.Seliware = Seliware.Initialize();
-                this.TopMost = true;
+                        this.TopMost = true;
+                    }
+
+                    if (!apiAvailability["Seliware"]())
+                        return false;
+
+                    break;
+
+                default:
+                    if (!apiAvailability.ContainsKey(API))
+                        return false;
+                    if (!apiAvailability[API]())
+                        return false;
+                    break;
             }
 
-            if (API.Equals("Synapse Z", StringComparison.OrdinalIgnoreCase) && Data.SynapseZ)
-            {
-                Data.API = API;
-                return true;
-            }
-            else if (API.Equals("Seliware", StringComparison.OrdinalIgnoreCase) && Data.Seliware)
-            {
-                Data.API = API;
-                return true;
-            }
-
-            return false;
+            Data.API = API;
+            return true;
         }
 
         public bool LoadAPI(string API)
         {
-            if (API == "") return false;
-            if (TryLoadAPI(API)) return true;
+            // Check if API is valid //
+            if (!string.IsNullOrEmpty(API) && TryLoadAPI(API)) 
+                return true;
 
+            // Try to use backup //
             string backupAPI = GetBackupAPI(API);
             if (TryLoadAPI(backupAPI))
             {
-                this.TopMost = false;
-                MessageBox.Show($"{API} API failed to load, using {backupAPI} as a backup API.", "MSPLOIT", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                this.TopMost = true;
+                topMost.MessageBoxShow($"{API} API failed to load, using {backupAPI} as a backup API.", "MSPLOIT", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 Data.API = backupAPI;
                 return true;
             }
 
-            this.TopMost = false;
-            MessageBox.Show("Every API is patched.", "MSPLOIT", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            this.TopMost = true;
+            topMost.MessageBoxShow("Every API is patched/failed to load.", "MSPLOIT", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return false;
         }
 
@@ -125,37 +149,67 @@ namespace MSploitRecode.Forms
         private async void UISelect_Load(object sender, EventArgs e)
         {
             await fade.FadeIn();
-            Tuple<string, string> DATA = Get();
+            if (!Data.SettingsLoaded) return;
 
-            if (!LoadAPI(DATA.Item2)) return;
-            await LoadUI(DATA.Item1, () =>
+            // Load Saved Data //
+            this.OpenTools.Checked = (bool)Data.Settings.ToolsUIEnabled;
+            this.UIList.SelectedIndex = this.UIList.FindString(Data.Settings.UI);
+            this.APIList.SelectedIndex = this.APIList.FindString(Data.Settings.API);
+
+            if (this.loadFromFile)
             {
-                this.Close();
-            });
+                if (LoadAPI(Data.Settings.API))
+                    await LoadUI(Data.Settings.UI, () =>
+                    {
+                        if ((bool)Data.Settings.ToolsUIEnabled)
+                        {
+                            if (Data.ToolsUIForm == null) Data.ToolsUIForm = new Tools();
+                            Data.ToolsUIForm.Show();
+                        }
+
+                        Data.injectorMain.Setup();
+                        this.Close();
+                    });
+            }
         }
 
         private async void Load_Click(object sender, EventArgs e)
         {
+            if (clicked) return;
+            clicked = true;
+
             if (this.UIList.SelectedIndex == -1)
             {
-                this.TopMost = false;
-                MessageBox.Show("Please select an UI.", "MSPLOIT");
-                this.TopMost = true;
+                topMost.MessageBoxShow("Please select an UI.", "MSPLOIT");
+                clicked = false;
                 return;
             }
 
             if (this.APIList.SelectedIndex == -1)
             {
-                this.TopMost = false;
-                MessageBox.Show("Please select an API.", "MSPLOIT");
-                this.TopMost = true;
+                topMost.MessageBoxShow("Please select an API.", "MSPLOIT");
+                clicked = false;
                 return;
             }
 
-            if (!LoadAPI(this.APIList.Text)) return;
+            // Load //
+            if (!LoadAPI(this.APIList.Text))
+            {
+                clicked = false; 
+                return;
+            }
+
             await LoadUI(this.UIList.Text, () =>
             {
                 Save();
+
+                if (this.OpenTools.Checked)
+                {
+                    if (Data.ToolsUIForm == null) Data.ToolsUIForm = new Tools();
+                    Data.ToolsUIForm.Show();
+                }
+
+                Data.injectorMain.Setup();
                 this.Close();
             });
         }

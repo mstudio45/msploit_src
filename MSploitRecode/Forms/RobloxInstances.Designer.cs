@@ -1,8 +1,6 @@
-﻿using MSploitRecode;
-
-namespace MSploitRecode
+﻿namespace MSploitRecode.Forms
 {
-    partial class Bootstrapper
+    partial class RobloxInstances
     {
         /// <summary>
         /// Required designer variable.
@@ -30,19 +28,17 @@ namespace MSploitRecode
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Bootstrapper));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RobloxInstances));
             this.TopBar = new System.Windows.Forms.Panel();
             this.ExecutorStatus = new System.Windows.Forms.Label();
             this.Minimize = new System.Windows.Forms.Label();
             this.Maximize = new System.Windows.Forms.Label();
             this.CloseBtn = new System.Windows.Forms.Label();
             this.TopBarName = new System.Windows.Forms.Label();
-            this.Logo = new System.Windows.Forms.PictureBox();
-            this.Status = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.Progress = new MSploitRecode.RJProgressBar();
+            this.InstanceList = new System.Windows.Forms.ComboBox();
+            this.UseInstance = new MSploit.RoundifiedButton();
+            this.ForceToTop = new MSploit.RoundifiedButton();
             this.TopBar.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.Logo)).BeginInit();
             this.SuspendLayout();
             // 
             // TopBar
@@ -79,6 +75,7 @@ namespace MSploitRecode
             this.Minimize.Size = new System.Drawing.Size(24, 22);
             this.Minimize.TabIndex = 3;
             this.Minimize.Text = "🗕";
+            this.Minimize.Visible = false;
             this.Minimize.Click += new System.EventHandler(this.Minimize_Click);
             // 
             // Maximize
@@ -92,6 +89,7 @@ namespace MSploitRecode
             this.Maximize.Size = new System.Drawing.Size(24, 22);
             this.Maximize.TabIndex = 2;
             this.Maximize.Text = "🗖";
+            this.Maximize.Visible = false;
             this.Maximize.Click += new System.EventHandler(this.Maximize_Click);
             // 
             // CloseBtn
@@ -105,6 +103,7 @@ namespace MSploitRecode
             this.CloseBtn.Size = new System.Drawing.Size(20, 22);
             this.CloseBtn.TabIndex = 1;
             this.CloseBtn.Text = "X";
+            this.CloseBtn.Visible = false;
             this.CloseBtn.Click += new System.EventHandler(this.Close_Click);
             // 
             // TopBarName
@@ -118,78 +117,77 @@ namespace MSploitRecode
             this.TopBarName.TabIndex = 0;
             this.TopBarName.Text = "msploit";
             // 
-            // Logo
+            // InstanceList
             // 
-            this.Logo.Image = ((System.Drawing.Image)(resources.GetObject("Logo.Image")));
-            this.Logo.Location = new System.Drawing.Point(0, 57);
-            this.Logo.Name = "Logo";
-            this.Logo.Size = new System.Drawing.Size(444, 206);
-            this.Logo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.Logo.TabIndex = 3;
-            this.Logo.TabStop = false;
+            this.InstanceList.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(27)))), ((int)(((byte)(27)))), ((int)(((byte)(27)))));
+            this.InstanceList.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.InstanceList.Font = new System.Drawing.Font("Consolas", 13.25F);
+            this.InstanceList.ForeColor = System.Drawing.SystemColors.Control;
+            this.InstanceList.FormattingEnabled = true;
+            this.InstanceList.Location = new System.Drawing.Point(17, 60);
+            this.InstanceList.Name = "InstanceList";
+            this.InstanceList.Size = new System.Drawing.Size(406, 30);
+            this.InstanceList.TabIndex = 3;
             // 
-            // Status
+            // UseInstance
             // 
-            this.Status.Font = new System.Drawing.Font("Consolas", 13.25F);
-            this.Status.ForeColor = System.Drawing.SystemColors.Control;
-            this.Status.Location = new System.Drawing.Point(12, 266);
-            this.Status.Name = "Status";
-            this.Status.Size = new System.Drawing.Size(420, 22);
-            this.Status.TabIndex = 7;
-            this.Status.Text = "Initializing...";
-            this.Status.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.UseInstance.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(27)))), ((int)(((byte)(27)))), ((int)(((byte)(27)))));
+            this.UseInstance.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(27)))), ((int)(((byte)(27)))), ((int)(((byte)(27)))));
+            this.UseInstance.BorderColor = System.Drawing.Color.Gray;
+            this.UseInstance.BorderRadius = 20;
+            this.UseInstance.BorderSize = 0;
+            this.UseInstance.FlatAppearance.BorderSize = 0;
+            this.UseInstance.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.UseInstance.Font = new System.Drawing.Font("Consolas", 13.25F);
+            this.UseInstance.ForeColor = System.Drawing.SystemColors.Control;
+            this.UseInstance.Location = new System.Drawing.Point(17, 103);
+            this.UseInstance.Name = "UseInstance";
+            this.UseInstance.Size = new System.Drawing.Size(200, 40);
+            this.UseInstance.TabIndex = 7;
+            this.UseInstance.Text = "Use Instance";
+            this.UseInstance.TextColor = System.Drawing.SystemColors.Control;
+            this.UseInstance.UseVisualStyleBackColor = false;
+            this.UseInstance.Click += new System.EventHandler(this.UseInstance_Click);
             // 
-            // label2
+            // ForceToTop
             // 
-            this.label2.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label2.ForeColor = System.Drawing.SystemColors.Control;
-            this.label2.Location = new System.Drawing.Point(-3, 338);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(447, 24);
-            this.label2.TabIndex = 9;
-            this.label2.Text = "Restart the application if you got stuck.";
-            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.ForceToTop.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(27)))), ((int)(((byte)(27)))), ((int)(((byte)(27)))));
+            this.ForceToTop.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(27)))), ((int)(((byte)(27)))), ((int)(((byte)(27)))));
+            this.ForceToTop.BorderColor = System.Drawing.Color.Gray;
+            this.ForceToTop.BorderRadius = 20;
+            this.ForceToTop.BorderSize = 0;
+            this.ForceToTop.FlatAppearance.BorderSize = 0;
+            this.ForceToTop.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.ForceToTop.Font = new System.Drawing.Font("Consolas", 13.25F);
+            this.ForceToTop.ForeColor = System.Drawing.SystemColors.Control;
+            this.ForceToTop.Location = new System.Drawing.Point(223, 103);
+            this.ForceToTop.Name = "ForceToTop";
+            this.ForceToTop.Size = new System.Drawing.Size(200, 40);
+            this.ForceToTop.TabIndex = 6;
+            this.ForceToTop.Text = "Highlight Instance";
+            this.ForceToTop.TextColor = System.Drawing.SystemColors.Control;
+            this.ForceToTop.UseVisualStyleBackColor = false;
+            this.ForceToTop.Click += new System.EventHandler(this.ForceToTop_Click);
             // 
-            // Progress
-            // 
-            this.Progress.ChannelColor = System.Drawing.Color.Gray;
-            this.Progress.ChannelHeight = 10;
-            this.Progress.Font = new System.Drawing.Font("Consolas", 13.25F);
-            this.Progress.ForeBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(27)))), ((int)(((byte)(27)))), ((int)(((byte)(27)))));
-            this.Progress.ForeColor = System.Drawing.SystemColors.Control;
-            this.Progress.Location = new System.Drawing.Point(12, 291);
-            this.Progress.Name = "Progress";
-            this.Progress.ShowMaximun = true;
-            this.Progress.ShowValue = MSploitRecode.TextPosition.Center;
-            this.Progress.Size = new System.Drawing.Size(420, 44);
-            this.Progress.SliderColor = System.Drawing.Color.PaleGreen;
-            this.Progress.SliderHeight = 15;
-            this.Progress.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
-            this.Progress.SymbolAfter = "";
-            this.Progress.SymbolBefore = "";
-            this.Progress.TabIndex = 8;
-            // 
-            // Bootstrapper
+            // RobloxInstances
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(15)))), ((int)(((byte)(15)))), ((int)(((byte)(15)))));
-            this.ClientSize = new System.Drawing.Size(444, 368);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.Progress);
-            this.Controls.Add(this.Status);
-            this.Controls.Add(this.Logo);
+            this.ClientSize = new System.Drawing.Size(444, 155);
+            this.Controls.Add(this.UseInstance);
+            this.Controls.Add(this.ForceToTop);
+            this.Controls.Add(this.InstanceList);
             this.Controls.Add(this.TopBar);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Name = "Bootstrapper";
+            this.Name = "RobloxInstances";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Bootstrapper";
+            this.Text = "MSPLOIT - RobloxInstances";
             this.TopMost = true;
-            this.Load += new System.EventHandler(this.Bootstrapper_Load);
+            this.Load += new System.EventHandler(this.RobloxInstances_Load);
             this.TopBar.ResumeLayout(false);
             this.TopBar.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.Logo)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -202,10 +200,8 @@ namespace MSploitRecode
         private System.Windows.Forms.Label Maximize;
         private System.Windows.Forms.Label CloseBtn;
         private System.Windows.Forms.Label TopBarName;
-        private System.Windows.Forms.PictureBox Logo;
-        private System.Windows.Forms.Label Status;
-        private RJProgressBar Progress;
-        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.ComboBox InstanceList;
+        private MSploit.RoundifiedButton ForceToTop;
+        private MSploit.RoundifiedButton UseInstance;
     }
 }
-

@@ -18,13 +18,19 @@ namespace MSploitRecode.Forms.synapse_ui
     public partial class Synapse_MainForm : Form
     {
         private Fade fade;
+        private TopMost topMost;
+
+        private Synapse_ScriptHub scriptHub = new Synapse_ScriptHub();
 
         public Synapse_MainForm()
         {
             InitializeComponent();
+            this.Load += new System.EventHandler(Program.OnFromLoaded);
+            this.FormClosed += Program.OnFromClosed;
 
             new Drag(this, this.TopBar);
             fade = new Fade(this);
+            topMost = new TopMost(this);
         }
 
         // Top Bar //
@@ -45,7 +51,8 @@ namespace MSploitRecode.Forms.synapse_ui
                 } catch { }
             }
 
-            Environment.Exit(0);
+            Program.bootstrapper.Close();
+            Application.Exit();
         }
 
         private void Minimize_Click(object sender, EventArgs e)
@@ -119,11 +126,11 @@ namespace MSploitRecode.Forms.synapse_ui
             }
             catch (COMException ex)
             {
-                MessageBox.Show($"Error initializing WebView2: {ex.Message}", "MSPLOIT");
+                topMost.MessageBoxShow($"Error initializing WebView2: {ex.Message}", "MSPLOIT");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"An unexpected error occurred: {ex.Message}", "MSPLOIT");
+                topMost.MessageBoxShow($"An unexpected error occurred: {ex.Message}", "MSPLOIT");
             }
         }
 
@@ -201,9 +208,13 @@ namespace MSploitRecode.Forms.synapse_ui
         // Main Buttons //
         private async void Inject_Click(object sender, EventArgs e)
         {
-            WrapperData data = InjectorMain.GetData();
+            topMost.Disable();
+
+            WrapperData data = Data.injectorMain.GetData();
             if (data.IsInjected)
             {
+                topMost.Enable();
+
                 this.TopBar.Text = "Synapse X - v" + Synapse_INFO.VERSION + " (already injected!)";
                 await Task.Delay(2500);
                 this.TopBar.Text = "Synapse X - v" + Synapse_INFO.VERSION + "";
@@ -212,8 +223,9 @@ namespace MSploitRecode.Forms.synapse_ui
 
             this.TopBar.Text = "Synapse X - v" + Synapse_INFO.VERSION + " (injecting...)";
 
-            InjectorMain.Inject();
+            Data.injectorMain.Inject();
             await Task.Delay(1000);
+            topMost.Enable();
 
             this.TopBar.Text = "Synapse X - v" + Synapse_INFO.VERSION + " (checking whitelist...)";
             await Task.Delay(1000);
@@ -229,9 +241,13 @@ namespace MSploitRecode.Forms.synapse_ui
 
         private async void Execute_Click(object sender, EventArgs e)
         {
+            topMost.Disable(); 
+
             string script = await GetText();
-            var data = InjectorMain.Execute(script);
-            if (!data.success) MessageBox.Show(data.message, "MSPLOIT", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            var data = Data.injectorMain.Execute(script);
+            if (!data.success) topMost.MessageBoxShow(data.message, "MSPLOIT", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+            topMost.Enable();
         }
 
         private void Clear_Click(object sender, EventArgs e)
@@ -243,7 +259,7 @@ namespace MSploitRecode.Forms.synapse_ui
         {
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
-                openFileDialog.InitialDirectory = Data.API == "Synapse Z" ? Path.Combine(InjectorMain.synapseZ.FolderPath, "scripts") : Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                openFileDialog.InitialDirectory = Data.API == "Synapse Z" ? Path.Combine(Data.injectorMain.synapseZ.FolderPath, "scripts") : Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
                 openFileDialog.Filter = "lua files (*.lua)|*.lua|txt files (*.txt)|*.txt|All files (*.*)|*.*";
                 openFileDialog.FilterIndex = 1;
                 openFileDialog.RestoreDirectory = true;
@@ -266,7 +282,7 @@ namespace MSploitRecode.Forms.synapse_ui
         {
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
-                openFileDialog.InitialDirectory = Data.API == "Synapse Z" ? Path.Combine(InjectorMain.synapseZ.FolderPath, "scripts") : Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                openFileDialog.InitialDirectory = Data.API == "Synapse Z" ? Path.Combine(Data.injectorMain.synapseZ.FolderPath, "scripts") : Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
                 openFileDialog.Filter = "lua files (*.lua)|*.lua|txt files (*.txt)|*.txt|All files (*.*)|*.*";
                 openFileDialog.FilterIndex = 1;
                 openFileDialog.RestoreDirectory = true;
@@ -278,9 +294,13 @@ namespace MSploitRecode.Forms.synapse_ui
 
                     using (StreamReader reader = new StreamReader(fileStream))
                     {
+                        topMost.Disable();
+
                         var script = reader.ReadToEnd();
-                        var data = InjectorMain.Execute(script);
-                        if (!data.success) MessageBox.Show(data.message, "MSPLOIT", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        var data = Data.injectorMain.Execute(script);
+                        if (!data.success) topMost.MessageBoxShow(data.message, "MSPLOIT", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+                        topMost.Enable();
                     }
                 }
             }
@@ -294,7 +314,7 @@ namespace MSploitRecode.Forms.synapse_ui
             {
                 var saveFileDialog = new SaveFileDialog
                 {
-                    InitialDirectory = Data.API == "Synapse Z" ? Path.Combine(InjectorMain.synapseZ.FolderPath, "scripts") : Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+                    InitialDirectory = Data.API == "Synapse Z" ? Path.Combine(Data.injectorMain.synapseZ.FolderPath, "scripts") : Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
                     Filter = "Lua files (*.lua)|*.lua|Text files (*.txt)|*.txt",
                     RestoreDirectory = true,
                     ShowHelp = false,
@@ -305,12 +325,24 @@ namespace MSploitRecode.Forms.synapse_ui
             }
             catch
             {
-                MessageBox.Show("Failed to save file.", "MSPLOIT", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                topMost.MessageBoxShow("Failed to save file.", "MSPLOIT", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
         private void button10_Click(object sender, EventArgs e)
         {
             AddNewTab("", "", "");
+        }
+
+        private void ScriptHub_Click(object sender, EventArgs e)
+        {
+            if (scriptHub == null) scriptHub = new Synapse_ScriptHub();
+            scriptHub.Show();
+        }
+
+        private void Options_Click(object sender, EventArgs e)
+        {
+            if (Data.SettingsUIForm == null) Data.SettingsUIForm = new Settings();
+            Data.SettingsUIForm.Show();
         }
 
         // Load //

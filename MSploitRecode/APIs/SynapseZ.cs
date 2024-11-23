@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace MSploitRecode.APIs
 {
+    // WARNING - This is edited, not the original API code.
+
+
     public struct SynapseZLaunchData
     {
         public string Version;
@@ -112,6 +115,46 @@ namespace MSploitRecode.APIs
             Process process = new Process();
             process.StartInfo.FileName = LauncherPath;
             process.StartInfo.Arguments = "redeem";
+            process.StartInfo.WorkingDirectory = FolderPath;
+
+            try
+            {
+                process.Start();
+                return 0;
+            }
+            catch (Exception e)
+            {
+                LatestErrorMsg = e.Message;
+                return 3;
+            }
+        }
+
+        /**
+         * Return values:
+         * 0 - Injection successful
+         * 1 - MainPath is not a valid Directory
+         * 2 - launcher not found
+         * 3 - Couldn't start the launcher
+        */
+        public int Info()
+        {
+            if (!Directory.Exists(FolderPath))
+            {
+                LatestErrorMsg = "FolderPath doesnt lead to a directory.";
+                return 1;
+            }
+
+            string LauncherPath = FindLauncher();
+
+            if (LauncherPath == String.Empty)
+            {
+                LatestErrorMsg = "Could not find the Launcher!";
+                return 2;
+            }
+
+            Process process = new Process();
+            process.StartInfo.FileName = LauncherPath;
+            process.StartInfo.Arguments = "info";
             process.StartInfo.WorkingDirectory = FolderPath;
 
             try
@@ -287,6 +330,31 @@ namespace MSploitRecode.APIs
          * Return values:
          * List<Process> - Injected Processes
         */
+        public List<Process> GetInjectedRobloxProcesses()
+        {
+            Nullable<SynapseZLaunchData> data = GetLaunchData();
+            if (data == null) return new List<Process>();
+            SynapseZLaunchData zLaunchData = (SynapseZLaunchData)data;
+
+            Process[] processes = GetRobloxProcesses();
+            List<Process> injectedProcesses = new List<Process>();
+
+            for (int i = 0; i < processes.Length; i++)
+            {
+                Process process = processes[i];
+
+                foreach (ProcessModule module in process.Modules)
+                {
+                    if (module.ModuleName == zLaunchData.DllName)
+                    {
+                        injectedProcesses.Add(process);
+                    }
+                }
+            }
+
+            return injectedProcesses;
+        }
+
         public List<Process> GetInjectedRobloxProcesses(SynapseZLaunchData data)
         {
             Process[] processes = GetRobloxProcesses();
