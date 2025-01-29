@@ -242,7 +242,7 @@ namespace MSploitRecode
             await Task.Delay(250);
             if (Data.injectorMain.synapseZ.FindLauncher() == String.Empty)
             {
-                bool SynZSuccess = await DownloadAndExtract("Synapse Z", "https://synapse-z.netlify.app/Synapse%20Z.zip", false, Path.Combine(Data.TempFolder, "SynapseZ.zip"), Data.injectorMain.synapseZ.FolderPath);
+                bool SynZSuccess = await DownloadAndExtract("Synapse Z", "https://synapsez.net/download", false, Path.Combine(Data.TempFolder, "SynapseZ.zip"), Data.injectorMain.synapseZ.FolderPath);
 
                 Data.SynapseZ = SynZSuccess && Data.injectorMain.synapseZ.FindLauncher() != String.Empty;
                 if (Data.SynapseZ)
